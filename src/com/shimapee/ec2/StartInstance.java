@@ -7,9 +7,11 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceStateName;
+import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StartInstancesResult;
@@ -42,16 +44,24 @@ public class StartInstance extends EC2InstanceFactory {
 		
 		boolean chkStatus = true;
 		while(chkStatus) {
-			DescribeInstanceStatusResult descInstanceResult = ec2.describeInstanceStatus(
-					new DescribeInstanceStatusRequest().withInstanceIds(
-							result.getStartingInstances().get(0).getInstanceId()));
+			DescribeInstancesResult descInstanceResult = ec2.describeInstances(
+					new DescribeInstancesRequest().withInstanceIds(startInstId)
+					);
 			
-			String stateInstance = descInstanceResult.getInstanceStatuses().get(0).getInstanceState().getName();
-			String instCheck = descInstanceResult.getInstanceStatuses().get(0).getInstanceStatus().getStatus();
-			String sysCheck = descInstanceResult.getInstanceStatuses().get(0).getSystemStatus().getStatus();
-			
+			Instance instance = descInstanceResult.getReservations().get(0).getInstances().get(0);
+			String stateInstance = instance.getState().getName();
+				
 			if(InstanceStateName.Running.toString().equalsIgnoreCase(stateInstance)) {
-				System.out.println("InstanceCheck:"+instCheck+";SystemCheck:"+sysCheck);
+				
+				DescribeInstanceStatusResult descInstStatusResult = ec2.describeInstanceStatus(
+						new DescribeInstanceStatusRequest().withInstanceIds(
+								instance.getInstanceId()
+								)
+						);
+				InstanceStatus statuses = descInstStatusResult.getInstanceStatuses().get(0);
+				String instCheck = statuses.getInstanceStatus().getStatus();
+				String sysCheck = statuses.getSystemStatus().getStatus();
+
 				if(instCheck.equals("ok") && sysCheck.equals("ok")) {
 					chkStatus = false;
 					System.out.println(instanceName + "を開始しました。");
@@ -68,4 +78,6 @@ public class StartInstance extends EC2InstanceFactory {
 
 	}
 }
+
+
 
