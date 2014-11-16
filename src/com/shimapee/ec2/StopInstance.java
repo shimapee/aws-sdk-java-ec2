@@ -38,6 +38,7 @@ public class StopInstance extends EC2InstanceFactory {
 		
 		stopRequest.withInstanceIds(stopInstId);
 		
+		@SuppressWarnings("unused")
 		StopInstancesResult stopResult = ec2.stopInstances(stopRequest);
 		System.out.println(stopInstId);
 

@@ -40,6 +40,8 @@ public class StartInstance extends EC2InstanceFactory {
 		StartInstancesRequest startRequest = new StartInstancesRequest();
 		
 		startRequest.withInstanceIds(startInstId);
+		
+		@SuppressWarnings("unused")
 		StartInstancesResult result = ec2.startInstances(startRequest);
 		
 		boolean chkStatus = true;
